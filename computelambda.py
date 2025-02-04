@@ -12,6 +12,10 @@ instrument_resistance = {
 
 # measurement table (Z1, Z2, Instrument)
 measurements = [
+    {"Z1": 0, "Z2": 1e12, "Instrument": "Multimeter"},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "1x Scope Probe"},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "10x Scope Probe"},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "Teensy"},
     {"Z1": 10, "Z2": 20, "Instrument": "Multimeter"},
     {"Z1": 10, "Z2": 20, "Instrument": "Teensy"},
     {"Z1": 1_000, "Z2": 2_000, "Instrument": "Multimeter"},
@@ -52,32 +56,6 @@ def compute_vout(Z1, Z2, instrument):
 results = [compute_vout(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
 
 # results
-
-# now adding the wire/open casrs
-# initially for some reason this did not work idk if i did something wrong so i just wrote it in separately
-
-def vout_wire_open(instrument):
-    R_inst = instrument_resistance[instrument]
-    
-    # Z2 is open so only path is through the instrument's resistance
-    Z2_eff = R_inst
-    
-    # nominal Vout 
-    Vout_nominal = Vin * (Z2_eff / (0 + Z2_eff))
-
-    # instrument uncertainty effects
-    Vout_min = Vout_nominal * (1 - tolerance)
-    Vout_max = Vout_nominal * (1 + tolerance)
-
-    return {"Instrument": instrument, "Z1": "wire", "Z2": "open", "Vout_nominal": Vout_nominal, "Vout_min": Vout_min, "Vout_max": Vout_max}
-
-# Compute results for wire and open cases
-wire_open_results = [vout_wire_open(instr) for instr in instrument_resistance.keys()]
-
-# Combine all results
-all_results = results + wire_open_results
-
-wire_open_results
 
 def compute_lambda(Z1, Z2, instrument):
     R_inst = instrument_resistance[instrument]
