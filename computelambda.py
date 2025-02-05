@@ -1,5 +1,5 @@
 # Given parameters
-Vin = 1  # Peak-to-peak voltage (1 Vpp)
+Vin = 0.5/(2 ** 0.5)  # Peak-to-peak voltage (1 Vpp); RMS value
 tolerance = 0.05  # 5% resistor tolerance
 
 # given instrument resistances
@@ -79,7 +79,7 @@ def compute_lambda(Z1, Z2, instrument):
     lambda_Z1 = abs((Vout_perturb_Z1 - Vout_nominal) / (Z1_perturb - Z1)) if Z1 else 0
     lambda_Z2 = abs((Vout_perturb_Z2 - Vout_nominal) / (Z2_perturb - Z2)) if Z2 else 0
 
-    lambda_total = lambda_Z1 + lambda_Z2
+    lambda_total = (lambda_Z1**2 + lambda_Z2**2) ** 0.5
 
     return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Lambda": lambda_total}
 
