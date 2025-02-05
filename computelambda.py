@@ -1,6 +1,8 @@
+import numpy as np
 # Given parameters
 Vin = 0.5/(2 ** 0.5)  # Peak-to-peak voltage (1 Vpp); RMS value
 tolerance = 0.05  # 5% resistor tolerance
+dVin_tol = 0.01 # 1% is typical? depends on voltage source i think
 
 # given instrument resistances
 instrument_resistance = {
@@ -29,61 +31,27 @@ measurements = [
     {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "Teensy"},
 ]
 
-def compute_vout(Z1, Z2, instrument):
-    R_inst = instrument_resistance[instrument]
-    
-    # effective Z2 with instrument loading
-    Z2_eff = (Z2 * R_inst) / (Z2 + R_inst) if Z2 else R_inst
-
-    # nominal Vout
-    Vout_nominal = Vin * (Z2_eff / (Z1 + Z2_eff))
-
-    # compute min/max due to resistor tolerance
-    Z1_min, Z1_max = Z1 * (1 - tolerance), Z1 * (1 + tolerance)
-    Z2_min, Z2_max = Z2 * (1 - tolerance), Z2 * (1 + tolerance)
-
-    # effective min/max with loading
-    Z2_eff_min = (Z2_min * R_inst) / (Z2_min + R_inst) if Z2_min else R_inst
-    Z2_eff_max = (Z2_max * R_inst) / (Z2_max + R_inst) if Z2_max else R_inst
-
-    # min/max Vout
-    Vout_min = Vin * (Z2_eff_min / (Z1_max + Z2_eff_min))
-    Vout_max = Vin * (Z2_eff_max / (Z1_min + Z2_eff_max))
-
-    return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Vout_nominal": Vout_nominal, "Vout_min": Vout_min, "Vout_max": Vout_max}
-
-# compute results for all cases
-results = [compute_vout(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
-
-# results
-
 def compute_lambda(Z1, Z2, instrument):
     R_inst = instrument_resistance[instrument]
 
     # Effective Z2 with instrument loading
     Z2_eff = (Z2 * R_inst) / (Z2 + R_inst) if Z2 else R_inst
 
-    # Vout for nominal values
-    Vout_nominal = Vin * (Z2_eff / (Z1 + Z2_eff))
+    # Partial derivatives
+    dVout_dZ1 = -Vin * (Z2_eff / (Z1 + Z2_eff)**2) if Z1 else 0
+    dZ2_eff_dZ2 = (R_inst**2) / ((Z2 + R_inst)**2) if Z2 != float("inf") else 0
+    dVout_dZ2 = Vin * (Z1 / (Z1 + Z2_eff)**2) * dZ2_eff_dZ2 if Z2 != float("inf") else 0
+    dVout_dVin = Z2_eff / (Z1 + Z2_eff)
 
-    # Vout for perturbed values (5% tolerance)
-    Z1_perturb = Z1 * 1.05  # +5%
-    Z2_perturb = Z2 * 1.05  # +5%
-    
-    Z2_eff_perturb = (Z2_perturb * R_inst) / (Z2_perturb + R_inst) if Z2_perturb else R_inst
+    # Error contributions based on partial derivatives and tolerance
+    dVout_Z1 = abs(dVout_dZ1 * (Z1 * tolerance)) if Z1 else 0
+    dVout_Z2 = abs(dVout_dZ2 * (Z2 * tolerance)) if Z2 != float("inf") else 0
+    dVout_Vin = abs(dVout_dVin * (Vin * dVin_tol))
 
-    Vout_perturb_Z1 = Vin * (Z2_eff / (Z1_perturb + Z2_eff))
-    Vout_perturb_Z2 = Vin * (Z2_eff_perturb / (Z1 + Z2_eff_perturb))
-
-    # compute lambda
-    lambda_Z1 = abs((Vout_perturb_Z1 - Vout_nominal) / (Z1_perturb - Z1)) if Z1 else 0
-    lambda_Z2 = abs((Vout_perturb_Z2 - Vout_nominal) / (Z2_perturb - Z2)) if Z2 else 0
-
-    lambda_total = (lambda_Z1**2 + lambda_Z2**2) ** 0.5
+    # Total error (quadrature sum)
+    lambda_total = np.sqrt(dVout_Z1**2 + dVout_Z2**2 + dVout_Vin**2)
 
     return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Lambda": lambda_total}
 
 # compute lambda for all cases
 lambda_results = [compute_lambda(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
-
-lambda_results
