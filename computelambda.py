@@ -15,20 +15,20 @@ instrument_resistance = {
 # measurement table (Z1, Z2, Instrument, Instrument Error)
 measurements = [
     {"Z1": 0, "Z2": 1e12, "Instrument": "Multimeter", "Instrument Error": 0.01},
-    {"Z1": 0, "Z2": 1e12, "Instrument": "1x Scope Probe", "Instrument Error": 0.01},
-    {"Z1": 0, "Z2": 1e12, "Instrument": "10x Scope Probe", "Instrument Error": 0.01},
-    {"Z1": 0, "Z2": 1e12, "Instrument": "Teensy", "Instrument Error": 0.01},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "1x Scope Probe", "Instrument Error": 0.02},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "10x Scope Probe", "Instrument Error": 0.02},
+    {"Z1": 0, "Z2": 1e12, "Instrument": "Teensy", "Instrument Error": 0.0048},
     {"Z1": 10, "Z2": 20, "Instrument": "Multimeter", "Instrument Error": 0.01},
-    {"Z1": 10, "Z2": 20, "Instrument": "Teensy", "Instrument Error": 0.01},
+    {"Z1": 10, "Z2": 20, "Instrument": "Teensy", "Instrument Error": 0.0048},
     {"Z1": 1_000, "Z2": 2_000, "Instrument": "Multimeter", "Instrument Error": 0.01},
-    {"Z1": 1_000, "Z2": 2_000, "Instrument": "Teensy", "Instrument Error": 0.01},
+    {"Z1": 1_000, "Z2": 2_000, "Instrument": "Teensy", "Instrument Error": 0.0048},
     {"Z1": 100_000, "Z2": 200_000, "Instrument": "Multimeter", "Instrument Error": 0.01},
-    {"Z1": 100_000, "Z2": 200_000, "Instrument": "1x Scope Probe", "Instrument Error": 0.01},
-    {"Z1": 100_000, "Z2": 200_000, "Instrument": "Teensy", "Instrument Error": 0.01},
+    {"Z1": 100_000, "Z2": 200_000, "Instrument": "1x Scope Probe", "Instrument Error": 0.02},
+    {"Z1": 100_000, "Z2": 200_000, "Instrument": "Teensy", "Instrument Error": 0.0048},
     {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "Multimeter", "Instrument Error": 0.01},
-    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "1x Scope Probe", "Instrument Error": 0.01},
-    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "10x Scope Probe", "Instrument Error": 0.01},
-    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "Teensy", "Instrument Error": 0.01},
+    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "1x Scope Probe", "Instrument Error": 0.02},
+    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "10x Scope Probe", "Instrument Error": 0.02},
+    {"Z1": 10_000_000, "Z2": 20_000_000, "Instrument": "Teensy", "Instrument Error": 0.0048},
 ]
 def compute_vout_opampin(Z1, Z2, instrument):
     R_inst = instrument_resistance[instrument]
