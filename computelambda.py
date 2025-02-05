@@ -2,7 +2,7 @@ import numpy as np
 # Given parameters
 Vin = 0.5/(2 ** 0.5)  # Peak-to-peak voltage (1 Vpp); RMS value
 tolerance = 0.05  # 5% resistor tolerance
-dVin_tol = 0.01 # 1% is typical? depends on voltage source i think
+dVin_tol = 0.01 # 1% is typical? depends on power source i think
 
 # given instrument resistances
 instrument_resistance = {
