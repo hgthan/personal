@@ -9,7 +9,7 @@ instrument_resistance = {
     "Multimeter": 10000000,  # 10MΩ
     "1x Scope Probe": 1000000,  # 1MΩ
     "10x Scope Probe": 10000000,  # 10MΩ
-    "Teensy": 636641348.4607166,  # 50kΩ
+    "Teensy": 636641348.4607166,  # xavier helped us
 }
 
 # measurement table (Z1, Z2, Instrument, Instrument Error)
@@ -125,9 +125,9 @@ def compute_lambda(Z1, Z2, instrument, instrument_error):
     dVout_dVin = (Z2_eff / (Z1 + Z2_eff))
 
     # error contributions based on partial derivatives and tolerance
-    dVout_Z1 = abs(dVout_dZ1 * (Z1 * tolerance)) if Z1 else 0
-    dVout_Z2 = abs(dVout_dZ2 * (Z2 * tolerance)) if Z2 != float("inf") else 0
-    dVout_Vin = abs(dVout_dVin * (Vin * dVin_tol))
+    # dVout_Z1 = abs(dVout_dZ1 * (Z1 * tolerance)) if Z1 else 0
+    # dVout_Z2 = abs(dVout_dZ2 * (Z2 * tolerance)) if Z2 != float("inf") else 0
+    # dVout_Vin = abs(dVout_dVin * (Vin * dVin_tol))
 
     # total error (quadrature sum)
     #lambda_total = np.sqrt(dVout_Z1**2 + dVout_Z2**2 + dVout_Vin**2)
