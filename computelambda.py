@@ -34,21 +34,21 @@ measurements = [
 def compute_lambda(Z1, Z2, instrument):
     R_inst = instrument_resistance[instrument]
 
-    # Effective Z2 with instrument loading
+    # effective Z2 with instrument loading
     Z2_eff = (Z2 * R_inst) / (Z2 + R_inst) if Z2 else R_inst
 
-    # Partial derivatives
+    # partial derivatives
     dVout_dZ1 = -Vin * (Z2_eff / (Z1 + Z2_eff)**2) if Z1 else 0
     dZ2_eff_dZ2 = (R_inst**2) / ((Z2 + R_inst)**2) if Z2 != float("inf") else 0
     dVout_dZ2 = Vin * (Z1 / (Z1 + Z2_eff)**2) * dZ2_eff_dZ2 if Z2 != float("inf") else 0
     dVout_dVin = Z2_eff / (Z1 + Z2_eff)
 
-    # Error contributions based on partial derivatives and tolerance
+    # error contributions based on partial derivatives and tolerance
     dVout_Z1 = abs(dVout_dZ1 * (Z1 * tolerance)) if Z1 else 0
     dVout_Z2 = abs(dVout_dZ2 * (Z2 * tolerance)) if Z2 != float("inf") else 0
     dVout_Vin = abs(dVout_dVin * (Vin * dVin_tol))
 
-    # Total error (quadrature sum)
+    # total error (quadrature sum)
     lambda_total = np.sqrt(dVout_Z1**2 + dVout_Z2**2 + dVout_Vin**2)
 
     return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Lambda": lambda_total}
