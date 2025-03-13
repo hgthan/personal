@@ -12,8 +12,6 @@ instrument_resistance = {
     "Teensy": 636641348.4607166,  # xavier helped us
 }
 
-# p_inf = float('inf') ; this just makes everything NAN for appropriate calcs
-
 # measurement table (Z1, Z2, Instrument, Instrument Error)
 measurements = [
     {"Z1": 0, "Z2": 1e12, "Instrument": "Multimeter", "Instrument Error": 0.01},
@@ -41,7 +39,19 @@ def compute_vout_opampin(Z1, Z2, instrument):
     # nominal Vout
     Vout_nominal = Vin * (Z2_eff / (Z1 + Z2_eff))
 
-    return {"Instrument": instrument, "Z1": Z1, "Z2_eff": Z2_eff, "Vout_nominal": Vout_nominal}
+    # compute min/max due to resistor tolerance
+    Z1_min, Z1_max = (Z1) * (1 - tolerance), Z1 * (1 + tolerance)
+    Z2_min, Z2_max = Z2 * (1 - tolerance), Z2 * (1 + tolerance)
+
+    # effective min/max with loading
+    Z2_eff_min = (Z2_min * R_inst) / (Z2_min + R_inst) if Z2_min else R_inst
+    Z2_eff_max = (Z2_max * R_inst) / (Z2_max + R_inst) if Z2_max else R_inst
+
+    # min/max Vout
+    Vout_min = Vin * (Z2_eff_min / (Z1_max + Z2_eff_min))
+    Vout_max = Vin * (Z2_eff_max / (Z1_min + Z2_eff_max))
+
+    return {"Instrument": instrument, "Z1": Z1, "Z2_eff": Z2_eff, "Vout_nominal": Vout_nominal, "Vout_min": Vout_min, "Vout_max": Vout_max}
 
 # compute results for all cases
 results = [compute_vout_opampin(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
@@ -56,7 +66,7 @@ def compute_vout_opampout(Z1, Z2, instrument):
     # nominal Vout
     Vout_nominal = Vin * (Z2_eff / (Z1 + Z2_eff))
 
-    return {"Instrument": instrument, "Z1": Z1, "Z2_eff": Z2_eff, "Vout_nominal": Vout_nominal}
+    return {"Instrument": instrument, "Z1": Z1, "Z2_eff": Z2_eff, "Vout_nominal": Vout_nominal, "Vout_min": Vout_min, "Vout_max": Vout_max}
 
 # compute results for all cases
 results = [compute_vout_opampout(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
@@ -71,13 +81,21 @@ def compute_vout(Z1, Z2, instrument):
     # nominal Vout
     Vout_nominal = Vin * (Z2_eff / (Z1 + Z2_eff))
 
+    # compute min/max due to resistor tolerance
+    Z1_min, Z1_max = (Z1) * (1 - tolerance), Z1 * (1 + tolerance)
+    Z2_min, Z2_max = Z2 * (1 - tolerance), Z2 * (1 + tolerance)
+
+    # effective min/max with loading
+    Z2_eff_min = (Z2_min * R_inst) / (Z2_min + R_inst) if Z2_min else R_inst
+    Z2_eff_max = (Z2_max * R_inst) / (Z2_max + R_inst) if Z2_max else R_inst
+
     # return {"Instrument": instrument, "Z1": Z1, "Z2_eff": Z2_eff, "Vout_nominal": Vout_nominal, "Vout_min": Vout_min, "Vout_max": Vout_max}
     return Vout_nominal
 
 # compute results for all cases
 results = [compute_vout(entry["Z1"], entry["Z2"], entry["Instrument"]) for entry in measurements]
 
-def compute_lambda(Z1, Z2, instrument, instrument_error):
+def compute_lambda1(Z1, Z2, instrument, instrument_error):
     R_inst = instrument_resistance[instrument]
 
     # effective Z2 with instrument loading
@@ -98,8 +116,12 @@ def compute_lambda(Z1, Z2, instrument, instrument_error):
     # total error (quadrature sum)
     #lambda_total = np.sqrt(dVout_Z1**2 + dVout_Z2**2 + dVout_Vin**2)
     lambda_total_in = np.sqrt(((dVout_dZ1**2)*((.05*Z1)**2)) + ((dVout_dZ2**2)*((.05*Z2)**2)) + ((dVout_dVin**2)*((.02*Vin)**2)) + (instrument_error*Vout)**2)
+    lambda_wire = np.sqrt((dVout_dVin**2)*((.02*Vin)**2) + (instrument_error*Vout)**2)
 
-    return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Lambda": lambda_total_in}
+    # return {"Instrument": instrument, "Z1": Z1, "Z2": Z2, "Lambda": lambda_total_in}
+    return 
 
 # compute lambda for all cases
-lambda_results = [compute_lambda(entry["Z1"], entry["Z2"], entry["Instrument"], entry["Instrument Error"]) for entry in measurements]
+lambda_results = [compute_lambda1(entry["Z1"], entry["Z2"], entry["Instrument"], entry["Instrument Error"]) for entry in measurements]
+
+def compute_lambda2(Z1, Z2, instrument): # using numerical method
