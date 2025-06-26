@@ -10,8 +10,8 @@ while temp < 2:
     if(response == "goodbye"):
         break
     elif (num == 1):
-        print("ooh ooh ah ah!\n")
+        print("ooh ooh ah ah!")
     elif (num == 2):
         print("ooh ooh ahh")
     else:
-        print("ooh ah?\n")
+        print("ooh ah?")
